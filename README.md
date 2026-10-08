@@ -32,6 +32,7 @@ mandato roubando pacotes de dinheiro, taxando cidadãos e fugindo da **Verdade**
 | Abaixar | segure o lado esquerdo | ↓ / S |
 | Cobrar imposto | botão **R$ IMPOSTO** | X / F / Enter |
 | Pausar | botão ⏸ / voltar do Android | Esc / P |
+<<<<<<< HEAD
 
 ## Estrutura
 
@@ -96,3 +97,5 @@ Para regerar assets: `python tool/gen_audio.py`, `python tool/gen_icon.py` e
 
 Configuração Android já pronta: `targetSdk 36`, orientação paisagem, ícone adaptativo,
 splash na cor do jogo, R8/shrink no release, `appCategory="game"`, sem permissões.
+=======
+>>>>>>> 34ac65cb2275d96b8d365cc4a7273c1ba62ce815
