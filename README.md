@@ -9,6 +9,9 @@ mandato roubando pacotes de dinheiro, taxando cidadãos e fugindo da **Verdade**
 
 ## O jogo
 
+<img width="970" height="786" alt="image" src="https://github.com/user-attachments/assets/793f049a-3a1a-42b3-937d-1fe834823912" />
+
+
 | Fase | Tema | Escândalos novos |
 |---|---|---|
 | Ano 1 — A Posse | manhã | CPI, Jornalista |
