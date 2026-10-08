@@ -1,0 +1,7 @@
+# Copie para android/key.properties e preencha (esse arquivo NÃO deve ir para o git).
+# Gere a chave de upload com:
+#   keytool -genkey -v -keystore %USERPROFILE%\mamata-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+storePassword=SUA_SENHA_DO_KEYSTORE
+keyPassword=SUA_SENHA_DA_CHAVE
+keyAlias=upload
+storeFile=C:/Users/SEU_USUARIO/mamata-upload.jks
