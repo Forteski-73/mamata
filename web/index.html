@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -18,12 +18,15 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="description" content="Mamata - fuja da Verdade até a Reeleição">
+  <meta name="theme-color" content="#14213D">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="mamata">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mamata">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
@@ -31,8 +34,167 @@
 
   <title>Mamata</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    @font-face {
+      font-family: 'Lilita';
+      src: url('assets/assets/fonts/LilitaOne-Regular.ttf') format('truetype');
+      font-display: swap;
+    }
+    html, body { margin: 0; height: 100%; background: #14213D; overflow: hidden; }
+
+    /* Tela de carregamento (removida quando o Flutter desenha o 1º quadro) */
+    #loading {
+      position: fixed; inset: 0; z-index: 10;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at center, #1F3366 0%, #14213D 70%);
+      font-family: 'Lilita', 'Arial Black', sans-serif; color: #fff;
+      transition: opacity .4s ease;
+    }
+    #loading.hide { opacity: 0; pointer-events: none; }
+    #loading .title {
+      font-size: clamp(48px, 13vw, 128px); color: #FFD60A; letter-spacing: 2px;
+      -webkit-text-stroke: clamp(4px, 1.1vw, 10px) #0B1430; paint-order: stroke fill;
+      transform: rotate(-3deg); animation: bob 2s ease-in-out infinite;
+    }
+    #loading .sub { font-size: clamp(16px, 3.2vw, 28px); margin: 6px 0 28px; opacity: .95; }
+    #loading .orange {
+      width: clamp(44px, 8vw, 72px); height: clamp(44px, 8vw, 72px); border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #FFC266 0 18%, #FF8C00 19% 100%);
+      border: 4px solid #0B1430; position: relative; animation: roll 1s linear infinite;
+    }
+    #loading .orange::after {
+      content: ''; position: absolute; top: -12px; left: 50%; width: 22px; height: 12px;
+      background: #43A047; border: 3px solid #0B1430; border-radius: 0 100% 0 100%;
+    }
+    #loading .bar {
+      width: min(60vw, 420px); height: 14px; margin-top: 26px; border-radius: 10px;
+      background: rgba(255,255,255,.15); border: 2px solid #fff; overflow: hidden;
+    }
+    #loading .bar i {
+      display: block; height: 100%; width: 35%; border-radius: 10px;
+      background: linear-gradient(90deg, #009C3B, #FFD60A);
+      animation: slide 1.4s ease-in-out infinite;
+    }
+    #loading .msg { margin-top: 14px; font-size: clamp(13px, 2.4vw, 20px); color: #9CFF57; min-height: 1.2em; }
+    /* Aviso "gire o celular" (só em telas de toque na vertical) */
+    #rotate {
+      display: none; position: fixed; inset: 0; z-index: 20;
+      flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+      background: #14213D; color: #fff; text-align: center; padding: 24px;
+      font-family: 'Lilita', 'Arial Black', sans-serif; font-size: 24px;
+    }
+    #rotate .phone {
+      width: 56px; height: 96px; border: 6px solid #FFD60A; border-radius: 12px;
+      animation: turn 1.8s ease-in-out infinite;
+    }
+    #rotate small { font-family: sans-serif; font-size: 15px; opacity: .8; }
+    @media (orientation: portrait) and (pointer: coarse) { #rotate { display: flex; } }
+    @keyframes turn { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+
+    /* Dica do iPhone: adicionar à tela de início para jogar sem as barras do navegador */
+    #ios-tip {
+      display: none; position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 15;
+      max-width: 92vw; padding: 10px 40px 10px 16px; border-radius: 14px;
+      background: rgba(20,33,61,.95); border: 2px solid #FFD60A; color: #fff;
+      font: 15px/1.35 sans-serif; box-shadow: 0 6px 18px rgba(0,0,0,.4);
+    }
+    #ios-tip b { color: #FFD60A; }
+    #ios-tip button {
+      position: absolute; right: 8px; top: 6px; border: 0; background: none;
+      color: #fff; font-size: 22px; line-height: 1; cursor: pointer;
+    }
+
+    @keyframes bob { 50% { transform: rotate(-3deg) translateY(-6px) scale(1.03); } }
+    @keyframes roll { to { transform: rotate(360deg); } }
+    @keyframes slide { 0% { margin-left: -35%; } 100% { margin-left: 100%; } }
+  </style>
 </head>
 <body>
+  <div id="loading" role="status" aria-live="polite">
+    <div class="title">MAMATA</div>
+    <div class="sub">Fuja da Verdade até a Reeleição!</div>
+    <div class="orange" aria-hidden="true"></div>
+    <div class="bar" aria-hidden="true"><i></i></div>
+    <div class="msg" id="loading-msg">Carregando a mamata…</div>
+  </div>
+
+  <div id="rotate" role="alert">
+    <div class="phone" aria-hidden="true"></div>
+    Gire o celular para jogar
+    <small>O Mamata é jogado com a tela deitada</small>
+  </div>
+
+  <div id="ios-tip" role="note">
+    Para jogar em <b>tela cheia</b>: toque em <b>Compartilhar</b> e depois em
+    <b>Adicionar à Tela de Início</b>.
+    <button type="button" aria-label="Fechar dica">&times;</button>
+  </div>
+
+  <script>
+    // Tela cheia: o navegador só permite após um toque do jogador.
+    (function () {
+      var root = document.documentElement;
+      var touch = window.matchMedia('(pointer: coarse)').matches;
+      var standalone = window.matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+      var canFullscreen = !!(root.requestFullscreen || root.webkitRequestFullscreen);
+      var isFull = function () { return !!(document.fullscreenElement || document.webkitFullscreenElement); };
+
+      function goFullscreen() {
+        if (isFull() || standalone) return;
+        var req = root.requestFullscreen || root.webkitRequestFullscreen;
+        try {
+          var p = req.call(root, { navigationUI: 'hide' });
+          if (p && p.then) {
+            p.then(function () {
+              if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(function () {});
+            }).catch(function () {});
+          }
+        } catch (e) {}
+      }
+
+      // Android/tablets: entra em tela cheia no primeiro toque (e volta a entrar se o jogador sair)
+      if (touch && canFullscreen) {
+        document.addEventListener('pointerdown', goFullscreen, { capture: true, passive: true });
+      }
+
+      // iPhone: sem API de tela cheia — sugere instalar na tela de início (uma vez)
+      var ios = /iPhone|iPod/.test(navigator.userAgent);
+      var tip = document.getElementById('ios-tip');
+      var dismissed = false;
+      try { dismissed = localStorage.getItem('mamata-ios-tip') === '1'; } catch (e) {}
+      if (ios && !standalone && !dismissed) {
+        tip.style.display = 'block';
+        tip.querySelector('button').addEventListener('click', function () {
+          tip.style.display = 'none';
+          try { localStorage.setItem('mamata-ios-tip', '1'); } catch (e) {}
+        });
+        setTimeout(function () { tip.style.display = 'none'; }, 15000);
+      }
+    })();
+  </script>
+
+  <script>
+    (function () {
+      var msgs = [
+        'Carregando a mamata…',
+        'Contando os pacotes de dinheiro…',
+        'Recrutando laranjas…',
+        'Escondendo provas da Verdade…',
+        'Imprimindo boletos de imposto…',
+        'Arquivando a CPI…'
+      ];
+      var i = 0, el = document.getElementById('loading-msg');
+      var timer = setInterval(function () { i = (i + 1) % msgs.length; el.textContent = msgs[i]; }, 1600);
+      window.addEventListener('flutter-first-frame', function () {
+        clearInterval(timer);
+        var l = document.getElementById('loading');
+        l.classList.add('hide');
+        setTimeout(function () { l.remove(); }, 500);
+      });
+    })();
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
