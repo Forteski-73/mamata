@@ -10,6 +10,9 @@ enum ObstacleType {
   pf,
   delacao,
   mandado,
+
+  /// Arremessado por cidadãos revoltados (não aparece sozinho nas fases).
+  tomate,
 }
 
 /// Paleta de céu/ambiente de cada fase.
@@ -79,6 +82,9 @@ class LevelConfig {
 
   /// Valor (em mil reais) arrecadado por imposto cobrado.
   final int taxValue;
+
+  /// Chance de um cidadão taxado à distância revidar com um tomate.
+  double get revoltChance => 0.3 + (number - 1) * 0.08;
 
   bool get isFinal => number == levels.length;
 }
@@ -193,7 +199,16 @@ const List<LevelConfig> levels = [
     maxSpeed: 660,
     truthRecovery: 17,
     hitPenalty: 170,
-    obstacles: ObstacleType.values,
+    obstacles: [
+      ObstacleType.cpi,
+      ObstacleType.jornalista,
+      ObstacleType.drone,
+      ObstacleType.tcu,
+      ObstacleType.cpmi,
+      ObstacleType.pf,
+      ObstacleType.delacao,
+      ObstacleType.mandado,
+    ],
     obstacleChance: 0.74,
     minGap: 470,
     maxGap: 720,

@@ -17,6 +17,8 @@ class ObstacleInfo {
     required this.hint,
     this.flying = false,
     this.extraSpeed = 0,
+    this.bottomOffset,
+    this.fatal = false,
   });
 
   final String name;
@@ -26,12 +28,19 @@ class ObstacleInfo {
   final bool flying;
   final double extraSpeed;
 
+  /// Altura da borda inferior em relação ao chão (padrão: chão ou altura de voo).
+  final double? bottomOffset;
+
+  /// Bater sem proteção encerra o mandato na hora.
+  final bool fatal;
+
   static final Map<ObstacleType, ObstacleInfo> all = {
     ObstacleType.cpi: ObstacleInfo(
       name: 'CPI',
       size: Vector2(120, 84),
       headline: 'CONVOCADO PELA CPI!',
-      hint: 'Pule por cima',
+      hint: 'Pule! Sem 3 laranjas = fim de jogo',
+      fatal: true,
     ),
     ObstacleType.jornalista: ObstacleInfo(
       name: 'Jornalista',
@@ -58,7 +67,8 @@ class ObstacleInfo {
       name: 'CPMI',
       size: Vector2(250, 96),
       headline: 'CONVOCADO PELA CPMI!',
-      hint: 'Pulo duplo ou laranja',
+      hint: 'Pulo duplo! Sem 3 laranjas = fim',
+      fatal: true,
     ),
     ObstacleType.pf: ObstacleInfo(
       name: 'Polícia Federal',
@@ -81,6 +91,15 @@ class ObstacleInfo {
       headline: 'MANDADO DE BUSCA E APREENSÃO!',
       hint: 'Pulo duplo',
     ),
+    ObstacleType.tomate: ObstacleInfo(
+      name: 'Tomate do Povo',
+      size: Vector2(30, 30),
+      headline: 'TOMATADA DO POVO!',
+      hint: 'Cidadão revoltado: abaixe-se',
+      flying: true,
+      extraSpeed: 380,
+      bottomOffset: 84,
+    ),
   };
 }
 
@@ -90,7 +109,7 @@ class Obstacle extends Entity {
         super(priority: 2) {
     size = info.size.clone();
     extraSpeed = info.extraSpeed;
-    final bottom = info.flying ? MamataGame.groundY - 76 : MamataGame.groundY;
+    final bottom = MamataGame.groundY - (info.bottomOffset ?? (info.flying ? 76 : 0));
     position = Vector2(x, bottom - size.y);
     _baseY = position.y;
   }
@@ -121,6 +140,8 @@ class Obstacle extends Entity {
       case ObstacleType.drone:
       case ObstacleType.delacao:
         return r.deflate(4);
+      case ObstacleType.tomate:
+        return r.deflate(3);
       default:
         return Rect.fromLTRB(r.left + 8, r.top + 6, r.right - 8, r.bottom);
     }
@@ -164,7 +185,9 @@ class Obstacle extends Entity {
     if (ghost) {
       canvas.saveLayer(null, Paint()..color = const Color(0x77FFFFFF));
     }
-    if (!info.flying) groundShadow(canvas, Offset(width / 2, height), width * 1.05);
+    if (!info.flying) {
+      groundShadow(canvas, Offset(width / 2, MamataGame.groundY - y), width * 1.05);
+    }
     switch (type) {
       case ObstacleType.cpi:
         _drawTable(canvas, 'CPI', const Color(0xFF1565C0));
@@ -182,6 +205,8 @@ class Obstacle extends Entity {
         _drawEnvelope(canvas);
       case ObstacleType.mandado:
         _drawWarrant(canvas);
+      case ObstacleType.tomate:
+        _drawTomato(canvas);
     }
     if (ghost) canvas.restore();
   }
@@ -391,4 +416,22 @@ class Obstacle extends Entity {
     cartoonRRect(c, const Rect.fromLTWH(-12, -36, 24, 12), const Color(0xFF8D6E63), radius: 3, outline: 2);
     c.restore();
   }
+
+  void _drawTomato(Canvas c) {
+    c.save();
+    c.translate(width / 2, height / 2);
+    c.drawCircle(const Offset(12, 0), 10, fill(const Color(0x55E53935))); // rastro
+    c.rotate(-age * 14);
+    cartoonCircle(c, Offset.zero, 14, const Color(0xFFE53935), outline: 2.5);
+    c.drawCircle(const Offset(-5, -5), 4, fill(const Color(0x88FFFFFF)));
+    final leaf = Path()
+      ..moveTo(0, -14)
+      ..lineTo(-6, -19)
+      ..lineTo(0, -16)
+      ..lineTo(6, -19)
+      ..close();
+    c.drawPath(leaf, fill(const Color(0xFF2E7D32)));
+    c.restore();
+  }
+
 }

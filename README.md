@@ -18,8 +18,15 @@ mandato roubando pacotes de dinheiro, taxando cidadãos e fugindo da **Verdade**
 
 - **A Verdade** persegue o político. Cada escândalo sofrido a aproxima; ela recua aos poucos
   enquanto você corre limpo. Se alcançar você, aparece a manchete no *Jornal da Verdade*.
-- **Laranjas** (máx. 5) assumem a culpa de um escândalo cada.
-- **Imposto**: arremesse boletos nos cidadãos (ou esbarre neles) para arrecadar.
+- **Laranjas** (máx. 5) assumem a culpa de um escândalo cada (custa 1).
+- **CPI e CPMI são fatais**: só o **laranjão** salva. Bater nelas com **3 ou mais** laranjas
+  mostra **"SEU LARANJA FOI PRESO!"** e desconta 3 (você passa ileso). Com menos de 3 (ou sem
+  Foro Privilegiado), **a Verdade te pega na hora**.
+- **Cidadãos** aparecem em grupos de 1 a 3 (média de 1,82 por grupo).
+- **Imposto**: arremesse boletos nos cidadãos (ou esbarre neles) para arrecadar. Taxado de
+  longe rende mais, mas o **cidadão revoltado** pode revidar com um **tomate** na altura
+  da cabeça (abaixe-se). Levar uma tomatada conta como escândalo. A chance de revide cresce
+  a cada ano (30% → 54%).
 - **Poderes**: Foro Privilegiado (imunidade), Fake News (empurra a Verdade), Emenda
   Parlamentar (ímã de dinheiro), Mala de Dinheiro (+R$ 500 mil).
 - **3 estrelas** por fase: concluir · no máximo 1 escândalo · desviar ≥ 60% do dinheiro.

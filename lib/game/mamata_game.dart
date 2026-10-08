@@ -53,6 +53,7 @@ class LevelResult {
     required this.stars,
     required this.record,
     required this.headline,
+    this.title = 'A VERDADE TE PEGOU!',
   });
 
   final LevelConfig level;
@@ -67,6 +68,9 @@ class LevelResult {
   final bool record;
   final String headline;
 
+  /// Título da tela de derrota.
+  final String title;
+
   double get percent => moneyAvailable == 0 ? 0 : money / moneyAvailable;
 }
 
@@ -77,6 +81,9 @@ class MamataGame extends FlameGame with KeyboardEvents {
   static const double playerX = 340;
   static const double maxTruthGap = 420;
   static const int maxOranges = 5;
+
+  /// Laranjas que o "laranjão" consome para assumir a culpa na CPI/CPMI.
+  static const int bustedOranges = 3;
 
   final math.Random rnd = math.Random();
   final List<Entity> entities = [];
@@ -120,6 +127,7 @@ class MamataGame extends FlameGame with KeyboardEvents {
   double _goTimer = 0;
   bool _dangerWarned = false;
   final Set<ObstacleType> _hinted = {};
+  Obstacle? _lastObstacle;
   LevelResult? lastResult;
 
   // ---- estado observado pela interface Flutter
@@ -132,6 +140,10 @@ class MamataGame extends FlameGame with KeyboardEvents {
   final powerN = ValueNotifier<PowerStatus?>(null);
   final taxCooldownN = ValueNotifier<double>(0);
   final hintsN = ValueNotifier<bool>(false);
+
+  /// Mostra por um instante a foto de fichamento do laranjão preso.
+  final mugshotN = ValueNotifier<bool>(false);
+  double _mugshotTimer = 0;
 
   bool get isRunning => phase == GamePhase.playing;
 
@@ -253,6 +265,7 @@ class MamataGame extends FlameGame with KeyboardEvents {
     _shake = 0;
     _dangerWarned = false;
     _hinted.clear();
+    _lastObstacle = null;
     _bannerTimer = 0;
     _goTimer = 0;
     final showHints = level.number == 1 || !StorageService.instance.tutorialSeen;
@@ -269,6 +282,8 @@ class MamataGame extends FlameGame with KeyboardEvents {
     powerN.value = null;
     taxCooldownN.value = 0;
     hintsN.value = false;
+    mugshotN.value = false;
+    _mugshotTimer = 0;
   }
 
   // ================================================================ entrada
@@ -360,6 +375,10 @@ class MamataGame extends FlameGame with KeyboardEvents {
     if (_bannerTimer > 0) {
       _bannerTimer -= dt;
       if (_bannerTimer <= 0) bannerN.value = null;
+    }
+    if (_mugshotTimer > 0) {
+      _mugshotTimer -= dt;
+      if (_mugshotTimer <= 0) mugshotN.value = false;
     }
 
     // tremor de câmera
@@ -490,16 +509,16 @@ class MamataGame extends FlameGame with KeyboardEvents {
       _spawnObstacle(level.obstacles[rnd.nextInt(level.obstacles.length)], x);
       return true;
     }
-    if (traveled - _lastOrangeAt > 3400) {
+    if (traveled - _lastOrangeAt > 2600) {
       _spawnOrange(x, air: rnd.nextBool());
       return false;
     }
     final r = rnd.nextDouble();
-    if (r < 0.42) {
+    if (r < 0.372) {
       _spawnMoneyRow(x);
-    } else if (r < 0.70) {
+    } else if (r < 0.652) {
       _spawnCitizens(x);
-    } else if (r < 0.86) {
+    } else if (r < 0.86) { // laranja: 20,8% (era 16%)
       _spawnOrange(x, air: rnd.nextDouble() < 0.4);
     } else {
       _spawnPowerUp(x);
@@ -515,6 +534,18 @@ class MamataGame extends FlameGame with KeyboardEvents {
 
   void _spawnObstacle(ObstacleType type, double x) {
     final o = Obstacle(type, x);
+    // Garante tempo para aterrissar do escândalo anterior e reagir a este,
+    // medido pela chegada até o político (considera obstáculos que vêm mais rápido).
+    final last = _lastObstacle;
+    if (last != null && last.isMounted) {
+      final lastBig = last.height > 120 || last.width > 200;
+      final tailPasses = (last.x + last.width - playerX) / (speed + last.extraSpeed);
+      final needed = tailPasses + (lastBig ? 0.95 : 0.65);
+      final arrives = (o.x - playerX) / (speed + o.extraSpeed);
+      if (arrives < needed) o.x = playerX + needed * (speed + o.extraSpeed);
+    }
+    _lastObstacle = o;
+    x = o.x;
     world.add(o);
     if (!_hinted.contains(type) && _newObstacleTypes.contains(type)) {
       _hinted.add(type);
@@ -530,7 +561,7 @@ class MamataGame extends FlameGame with KeyboardEvents {
         final by = groundY - o.height - 70 - (2 - i.abs()) * 34 - 44;
         _addMoney(Vector2(bx, by));
       }
-    } else if (r < 0.7) {
+    } else if (r < 0.745) {
       world.add(OrangeFruit(Vector2(cx - 20, groundY - o.height - 120)));
       _lastOrangeAt = traveled;
     }
@@ -555,7 +586,8 @@ class MamataGame extends FlameGame with KeyboardEvents {
   }
 
   void _spawnCitizens(double x) {
-    final n = 1 + (rnd.nextDouble() < 0.4 ? 1 : 0);
+    // média de 1,82 cidadão por grupo (30% a mais que antes), até 3 por grupo
+    final n = 1 + (rnd.nextDouble() < 0.62 ? 1 : 0) + (rnd.nextDouble() < 0.2 ? 1 : 0);
     for (var i = 0; i < n; i++) {
       world.add(Citizen(x + i * 110, rnd));
       moneyAvailable += (level.taxValue * 1.5).round();
@@ -652,7 +684,12 @@ class MamataGame extends FlameGame with KeyboardEvents {
 
   void taxCitizen(Citizen c, {required bool ranged}) {
     final value = ranged ? (level.taxValue * 1.5).round() : level.taxValue;
-    c.markTaxed();
+    // Taxado de longe, o cidadão pode revidar com um tomate.
+    final retaliate = ranged && c.x > player.x + 260 && rnd.nextDouble() < level.revoltChance;
+    if (retaliate && _hinted.add(ObstacleType.tomate)) {
+      _banner('CIDADÃO REVOLTADO!', subtitle: 'Lá vem tomate: ABAIXE-SE!', color: const Color(0xFFFF8A65));
+    }
+    c.markTaxed(retaliate: retaliate);
     addMoney(value);
     taxes++;
     taxMoney += value;
@@ -684,16 +721,33 @@ class MamataGame extends FlameGame with KeyboardEvents {
       o.ghost = true;
       return;
     }
+    // CPI/CPMI: só o "laranjão" (3 laranjas) assume a culpa; sem ele, a Verdade pega na hora.
+    if (o.info.fatal && oranges < bustedOranges) {
+      hits++;
+      _caught(
+        headline: 'Sem laranjão para assumir a culpa, político cai na ${o.info.name} '
+            'com ${formatMoney(money)} no bolso!',
+      );
+      return;
+    }
     if (oranges > 0) {
-      oranges--;
-      orangesUsed++;
+      final bigOrange = o.info.fatal;
+      final lost = bigOrange ? bustedOranges : 1;
+      oranges -= lost;
+      orangesUsed += lost;
       orangesN.value = oranges;
       o.ghost = true;
       player.invulnerable = 0.5;
-      AudioService.instance.play(Sfx.shield);
-      AudioService.instance.vibrate();
-      world.add(FloatingText('A LARANJA ASSUMIU A CULPA!', center.clone()..y -= 50,
-          color: const Color(0xFFFFA726), size: 22, life: 1.3));
+      AudioService.instance.play(bigOrange ? Sfx.alarm : Sfx.shield);
+      AudioService.instance.vibrate(heavy: bigOrange);
+      if (bigOrange) {
+        _shake = 0.3;
+        _banner('SEU LARANJA FOI PRESO!', subtitle: '-$bustedOranges laranjas', color: const Color(0xFFFF8C00));
+        mugshotN.value = true;
+        _mugshotTimer = 1.7;
+      }
+      world.add(FloatingText(bigOrange ? '-$bustedOranges LARANJAS' : 'A LARANJA ASSUMIU A CULPA!',
+          center.clone()..y -= 50, color: const Color(0xFFFFA726), size: 22, life: 1.3));
       world.add(Burst(
         origin: center,
         colors: const [Color(0xFFFF8C00), Color(0xFFFFCC80)],
@@ -776,7 +830,7 @@ class MamataGame extends FlameGame with KeyboardEvents {
   }
 
   // ================================================================ fim de fase
-  void _caught() {
+  void _caught({String? title, String? headline}) {
     phase = GamePhase.caught;
     _phaseTimer = 0;
     truthGap = 0;
@@ -788,7 +842,7 @@ class MamataGame extends FlameGame with KeyboardEvents {
     AudioService.instance.play(Sfx.caught);
     AudioService.instance.vibrate(heavy: true);
     _shake = 0.6;
-    final headline = kCaughtHeadlines[rnd.nextInt(kCaughtHeadlines.length)].replaceAll('{m}', formatMoney(money));
+    headline ??= kCaughtHeadlines[rnd.nextInt(kCaughtHeadlines.length)].replaceAll('{m}', formatMoney(money));
     lastResult = LevelResult(
       level: level,
       completed: false,
@@ -801,6 +855,7 @@ class MamataGame extends FlameGame with KeyboardEvents {
       stars: 0,
       record: false,
       headline: headline,
+      title: title ?? 'A VERDADE TE PEGOU!',
     );
     overlays.remove('hud');
   }

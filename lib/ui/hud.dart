@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../game/mamata_game.dart';
 import '../util/format.dart';
+import 'mugshot.dart';
 import 'widgets.dart';
 
 /// HUD + zona de toque: esquerda segura = abaixar, direita = pular.
@@ -165,6 +166,26 @@ class Hud extends StatelessWidget {
                             ],
                           ],
                         ),
+                ),
+              ),
+            ),
+          ),
+
+          // foto do laranjão preso
+          Align(
+            alignment: const Alignment(0.72, -0.05),
+            child: IgnorePointer(
+              child: ValueListenableBuilder<bool>(
+                valueListenable: game.mugshotN,
+                builder: (_, show, _) => AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  transitionBuilder: (child, anim) => ScaleTransition(
+                    scale: CurvedAnimation(parent: anim, curve: Curves.easeOutBack),
+                    child: FadeTransition(opacity: anim, child: child),
+                  ),
+                  child: show
+                      ? MugshotCard(key: const ValueKey('mugshot'), width: box.maxHeight * 0.38)
+                      : const SizedBox.shrink(),
                 ),
               ),
             ),

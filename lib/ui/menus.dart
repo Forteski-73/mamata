@@ -132,7 +132,7 @@ class LevelSelect extends StatelessWidget {
               const SizedBox(width: 54),
             ]),
             const SizedBox(height: 6),
-            const StrokeText('4 anos de mamata até a reeleição', size: 20),
+            const StrokeText('4 anos de mamata até a reeleição', size: 22),
             const SizedBox(height: 22),
             Expanded(
               child: Row(
@@ -311,7 +311,8 @@ class HowToPlay extends StatelessWidget {
                           'IMPOSTO', 'Arremesse boletos nos cidadãos (ou esbarre neles) para arrecadar. Teclado: X.'),
                       row(const MoneyIcon(size: 40), 'DINHEIRO', 'Pegue os pacotes. Desvie 60% para ganhar estrela.'),
                       row(const OrangeIcon(size: 38), 'LARANJAS',
-                          'Cada laranja assume a culpa por um escândalo — você passa ileso.'),
+                          'Cada laranja assume a culpa por um escândalo — você passa ileso. '
+                          'Na CPI/CPMI só o laranjão salva: custa 3 laranjas (com menos, a Verdade te pega)!'),
                       row(ic(Icons.how_to_vote_rounded, AppColors.green), 'OBJETIVO',
                           'Chegue ao fim de cada ano do mandato e, no 4º ano, à urna da Reeleição.'),
                     ]),

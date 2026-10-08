@@ -212,7 +212,7 @@ class GameOverScreen extends StatelessWidget {
                 ]),
                 Container(height: 1.5, color: const Color(0xFF111111), margin: const EdgeInsets.symmetric(vertical: 6)),
                 const SizedBox(height: 4),
-                const StrokeText('A VERDADE TE PEGOU!', size: 40, color: AppColors.red),
+                StrokeText(r.title, size: 40, color: AppColors.red),
                 const SizedBox(height: 8),
                 Text(
                   r.headline,
