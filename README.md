@@ -66,36 +66,3 @@ flutter test                # testes automatizados
 
 Para regerar assets: `python tool/gen_audio.py`, `python tool/gen_icon.py` e
 `dart run flutter_launcher_icons`.
-
-## Publicando na Google Play
-
-1. **ID do app** — em [android/app/build.gradle.kts](android/app/build.gradle.kts) troque
-   `applicationId = "br.com.mamata.game"` pelo seu (ex.: `com.seuestudio.mamata`).
-   Depois da primeira publicação ele não pode mudar.
-2. **Chave de upload** (uma única vez, guarde em local seguro):
-   ```bash
-   keytool -genkey -v -keystore %USERPROFILE%\mamata-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
-   ```
-   Copie [android/key.properties.example](android/key.properties.example) para
-   `android/key.properties` e preencha (o arquivo está no `.gitignore`).
-3. **Versão** — em `pubspec.yaml`, `version: 1.0.0+1` (o número após o `+` é o
-   `versionCode` e deve aumentar a cada envio).
-4. **Gerar o bundle**:
-   ```bash
-   flutter build appbundle --release
-   ```
-   Saída: `build/app/outputs/bundle/release/app-release.aab`.
-5. **Play Console** — crie o app, envie o `.aab` (teste interno → produção) e preencha:
-   - Ficha da loja: textos em [store/listing.md](store/listing.md), ícone
-     `store/icon_512.png`, arte `store/feature_graphic.png`, capturas `store/screenshots/`.
-   - Política de privacidade: publique [PRIVACY_POLICY.md](PRIVACY_POLICY.md) em uma URL
-     pública (GitHub Pages, Google Sites…) e informe a URL.
-   - Segurança dos dados: **nenhum dado coletado ou compartilhado**.
-   - Classificação de conteúdo (IARC): jogo, humor/sátira, sem violência realista, sem
-     compras, sem anúncios, sem interação entre usuários.
-   - Público-alvo: 13+ (sátira política).
-
-Configuração Android já pronta: `targetSdk 36`, orientação paisagem, ícone adaptativo,
-splash na cor do jogo, R8/shrink no release, `appCategory="game"`, sem permissões.
-=======
->>>>>>> 34ac65cb2275d96b8d365cc4a7273c1ba62ce815
